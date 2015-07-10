@@ -1,0 +1,27 @@
+{
+  "name": "Unity-ItemPlacing",
+  "version": "0.1.0",
+  "homepage": "https://github.com/shinobushiva/Unity-ItemPlacing",
+  "authors": [
+    "Shinobu Izumi <stagesp1@gmail.com>"
+  ],
+  "description": "Item Placing for Unity",
+  "keywords": [
+    "data",
+    "save",
+    "load",
+    "unity",
+    "unity3d"
+  ],
+   "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "DataSaveLoad": "shinobushiva/Unity-DataSaveLoad"
+  }
+}
