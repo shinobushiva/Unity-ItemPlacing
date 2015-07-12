@@ -158,7 +158,7 @@ namespace Shiva.ItemPlacing {
 			PlaceItem[] pis = FindObjectsOfType<PlaceItem> ();
 			placedItems.AddRange (pis);
 
-			dataSaveLoad.dataLoadHandler += DataLoaded;
+			dataSaveLoad.AddHandler(DataLoaded, typeof(List<PlaceItemData>));
 		}
 
 		private void SetTarget (GameObject t)
@@ -193,7 +193,7 @@ namespace Shiva.ItemPlacing {
 		public PlaceItem PickItem ()
 		{
 			bool b;
-			Ray ray = cameraSwitcher.currentActive.c.ScreenPointToRay (Input.mousePosition);
+			Ray ray = cameraSwitcher.CurrentActive.c.ScreenPointToRay (Input.mousePosition);
 			RaycastHit hit;
 			b = Physics.Raycast (ray, out hit);
 			if (b) {
@@ -219,7 +219,7 @@ namespace Shiva.ItemPlacing {
 					return;
 				
 				bool b;
-				RaycastHit hit = RayHit (out b, cameraSwitcher.currentActive.c);
+				RaycastHit hit = RayHit (out b, cameraSwitcher.CurrentActive.c);
 				if (b) {
 					targetObject.transform.position = hit.point;
 				}
@@ -295,7 +295,7 @@ namespace Shiva.ItemPlacing {
 						targetObject.transform.position = pos;
 					} else {
 						bool b;
-						RaycastHit hit = RayHit (out b, cameraSwitcher.currentActive.c);
+						RaycastHit hit = RayHit (out b, cameraSwitcher.CurrentActive.c);
 						if (b) {
 							Vector3 pos = hit.point;
 							targetObject.transform.position = pos;
