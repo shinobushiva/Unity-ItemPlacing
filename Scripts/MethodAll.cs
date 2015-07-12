@@ -131,15 +131,15 @@ public class MethodAll : MonoBehaviour
     //-----------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public RaycastHit RayHit()
+    public RaycastHit RayHit(Camera c)
     {
         bool b;
-        return RayHit(out b);
+        return RayHit(out b, c);
     }
 
-    public RaycastHit RayHit(out bool b)
+    public RaycastHit RayHit(out bool b, Camera c)
     {
-        Ray ray = CameraSwitcher.Instance.currentActive.c.ScreenPointToRay(Input.mousePosition);
+        Ray ray = c.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         b = Physics.Raycast(ray, out hit);
         return hit;

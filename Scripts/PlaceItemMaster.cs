@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using DataSaveLoad;
+using Shiva.CameraSwitch;
 
 namespace Shiva.ItemPlacing {
 	public class PlaceItemMaster : MethodAll
@@ -125,11 +126,10 @@ namespace Shiva.ItemPlacing {
 			wasPointerDownInUI = false;
 		}
 
-
-		// Use this for initialization
-		void Start ()
-		{
-
+		private CameraSwitcher cameraSwitcher;
+		void Start(){
+			cameraSwitcher = FindObjectOfType<CameraSwitcher> ();
+	
 			foreach (PlaceItem pi in placeItems.placeItems) {
 
 				GameObject pip = GameObject.Instantiate (placeItemPrefab);
@@ -193,7 +193,7 @@ namespace Shiva.ItemPlacing {
 		public PlaceItem PickItem ()
 		{
 			bool b;
-			Ray ray = CameraSwitcher.Instance.currentActive.c.ScreenPointToRay (Input.mousePosition);
+			Ray ray = cameraSwitcher.currentActive.c.ScreenPointToRay (Input.mousePosition);
 			RaycastHit hit;
 			b = Physics.Raycast (ray, out hit);
 			if (b) {
@@ -219,7 +219,7 @@ namespace Shiva.ItemPlacing {
 					return;
 				
 				bool b;
-				RaycastHit hit = RayHit (out b);
+				RaycastHit hit = RayHit (out b, cameraSwitcher.currentActive.c);
 				if (b) {
 					targetObject.transform.position = hit.point;
 				}
@@ -295,7 +295,7 @@ namespace Shiva.ItemPlacing {
 						targetObject.transform.position = pos;
 					} else {
 						bool b;
-						RaycastHit hit = RayHit (out b);
+						RaycastHit hit = RayHit (out b, cameraSwitcher.currentActive.c);
 						if (b) {
 							Vector3 pos = hit.point;
 							targetObject.transform.position = pos;
