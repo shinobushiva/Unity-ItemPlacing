@@ -14,7 +14,7 @@ namespace Shiva.ItemPlacing {
 		public Text selectedTarget;
 
 		//
-		private GameObject CreateOb;
+		private GameObject createOb;
 		public PlaceItems placeItems;
 		public GameObject placeItemPrefab;
 		public RectTransform scrollContent;
@@ -129,7 +129,6 @@ namespace Shiva.ItemPlacing {
 		// Use this for initialization
 		void Start ()
 		{
-			
 
 			foreach (PlaceItem pi in placeItems.placeItems) {
 
@@ -214,6 +213,7 @@ namespace Shiva.ItemPlacing {
 		// Update is called once per frame
 		void Update ()
 		{
+
 			if (creating) {
 				if (!targetObject)
 					return;
@@ -446,6 +446,9 @@ namespace Shiva.ItemPlacing {
 			placedItems.Clear ();
 				
 			List<PlaceItemData> pids = data as List<PlaceItemData>;
+			if (pids == null)
+				return;
+
 			foreach (PlaceItemData pid in pids) {
 				PlaceItem pi = placeItems.GetItemByName (pid.itemName.Trim ());
 					
