@@ -27,8 +27,10 @@ namespace Shiva.ItemPlacing {
 		}
 
 		public PlaceItem GetItemByName(string n){
-			if(!map.ContainsKey(n))
-				print(n);
+			if (!map.ContainsKey (n)) {
+				print (n);
+				return null;
+			}
 
 			return map [n];
 		}

@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using DataSaveLoad;
 using Shiva.CameraSwitch;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace Shiva.ItemPlacing {
 	public class PlaceItemMaster : MethodAll
@@ -12,7 +14,9 @@ namespace Shiva.ItemPlacing {
 		//
 		public DataSaveLoadMaster dataSaveLoad;
 		public string folder = "ItemPlacing";
+		private string latestAutoSavefile = "ItemPlacing_AutoSaved";
 		public Text selectedTarget;
+		public Button undoButton;
 
 		//
 		private GameObject createOb;
@@ -34,6 +38,9 @@ namespace Shiva.ItemPlacing {
 		private Vector3 targetPosition;
 		private Quaternion targetRotation;
 		private Vector3 targetScale;
+
+		//
+		public RectTransform extensionPanel;
 
 		[System.Serializable]
 		public enum State
@@ -126,6 +133,19 @@ namespace Shiva.ItemPlacing {
 			wasPointerDownInUI = false;
 		}
 
+		void CreatePlaceItemInstance (PlaceItem pi)
+		{
+			if (Network.isServer || Network.isClient)
+				targetObject = (GameObject)Network.Instantiate (pi.gameObject, Vector3.zero, pi.transform.rotation, 1);
+			else
+				targetObject = (GameObject)GameObject.Instantiate (pi.gameObject, Vector3.zero, pi.transform.rotation);
+
+			placedItems.Add (targetObject.GetComponent<PlaceItem> ());
+			SetCollider (targetObject, false);
+			creating = true;
+			endCreation = false;
+		}
+
 		private CameraSwitcher cameraSwitcher;
 		void Start(){
 			cameraSwitcher = FindObjectOfType<CameraSwitcher> ();
@@ -137,44 +157,60 @@ namespace Shiva.ItemPlacing {
 				PlaceItemEntry pie = pip.GetComponent<PlaceItemEntry> ();
 				pie.PlaceItem = pi;
 				pie.itemButton.onClick.AddListener (() => {
-					if (Network.isServer || Network.isClient)
-						targetObject = (GameObject)Network.Instantiate (pie.PlaceItem.gameObject, Vector3.zero, 
-						                                                pie.PlaceItem.transform.rotation, 1);
-					else
-						targetObject = (GameObject)GameObject.Instantiate (pie.PlaceItem.gameObject, Vector3.zero, 
-						                                                   pie.PlaceItem.transform.rotation);
-
-					placedItems.Add (targetObject.GetComponent<PlaceItem> ());
-	                        
-					SetCollider (targetObject, false);
-					creating = true;
-					endCreation = false;
-
+					CreatePlaceItemInstance (pie.PlaceItem);
 				});
 			}
-			SetTarget (null);
 
 			placedItems = new List<PlaceItem> ();
-			PlaceItem[] pis = FindObjectsOfType<PlaceItem> ();
-			placedItems.AddRange (pis);
+			SetTarget (null);
 
 			dataSaveLoad.AddHandler(DataLoaded, typeof(List<PlaceItemData>));
+
+			FileInfo fi = new FileInfo (dataSaveLoad.GetFilePath (latestAutoSavefile, folder));
+			print (dataSaveLoad.GetFilePath (folder, latestAutoSavefile));
+			if (fi.Exists) {
+
+				dataSaveLoad.Load (fi, typeof(List<PlaceItemData>));
+				//PlaceItem[] pis = FindObjectsOfType<PlaceItem> ();
+				//placedItems.AddRange (pis);
+
+				SetTarget (null);
+			}
+		}
+
+		void OnApplicationQuit(){
+			List<PlaceItemData> data = CreateDataForSerialization ();
+			dataSaveLoad.Save (latestAutoSavefile, folder, data);
 		}
 
 		private void SetTarget (GameObject t)
 		{
 			targetObject = t;
-			selectedTarget.text = "<None Selected>";
-			selectedTarget.color = Color.gray;
+			selectedTarget.text = "" + placedItems.Count + " items are placed";
+			selectedTarget.color = Color.white;
+
+			RectTransform[] recs = extensionPanel.GetComponentsInChildren<RectTransform>();
+			foreach(RectTransform rec in recs){
+				if(rec != extensionPanel)
+					Destroy(rec.gameObject);
+			}
+
 			if (targetObject != null) {
 				SetCollider (targetObject, false);
 				targetPosition = t.transform.position;
 				targetRotation = t.transform.rotation;
 				targetScale = t.transform.localScale;
-				targetObject.GetComponent<PlaceItem> ().StartEditing ();
 
 				selectedTarget.text = targetObject.name;
-				selectedTarget.color = Color.white;
+				selectedTarget.color = Color.green;
+
+				undoButton.interactable = targetObject.GetComponent<PlaceItem> ().IsUndoable ();
+
+				PlaceItemExtension[] exts = targetObject.GetComponents<PlaceItemExtension>();
+				foreach(PlaceItemExtension pie in exts){
+					RectTransform rt = pie.GetEditorPanel();
+					rt.transform.SetParent(extensionPanel.transform, false);
+				}
 			}
 
 		}
@@ -230,6 +266,10 @@ namespace Shiva.ItemPlacing {
 				if (endCreation && Input.GetMouseButtonUp (0)) {
 					SetCollider (targetObject, true);
 					creating = false;
+
+					SetTarget (targetObject);
+					wasPointerDownInUI = false;
+
 				}
 				
 				return;
@@ -262,6 +302,7 @@ namespace Shiva.ItemPlacing {
 					if (pi) {
 						SetTarget (pi.gameObject);
 						pressedMousePosition = Input.mousePosition;
+						targetObject.GetComponent<PlaceItem> ().StartEditing ();
 					}
 				}
 			}
@@ -275,6 +316,7 @@ namespace Shiva.ItemPlacing {
 					if (!xEnabled || !yEnabled || !zEnabled) {
 
 						Vector3 dd = Input.mousePosition - pressedMousePosition;
+
 						float dir = 0;
 						if (Mathf.Abs (dd.x) < Mathf.Abs (dd.y)) {
 							dir = dd.y;
@@ -294,6 +336,10 @@ namespace Shiva.ItemPlacing {
 						
 						targetObject.transform.position = pos;
 					} else {
+						Vector3 dd = Input.mousePosition - pressedMousePosition;
+						if(dd.magnitude  < 2)
+							return;
+
 						bool b;
 						RaycastHit hit = RayHit (out b, cameraSwitcher.CurrentActive.c);
 						if (b) {
@@ -305,6 +351,7 @@ namespace Shiva.ItemPlacing {
 				}
 
 				if (Input.GetMouseButtonUp (0)) {
+
 					SetCollider (targetObject, true);
 					targetObject.GetComponent<PlaceItem> ().EndEditing ();
 				}
@@ -340,6 +387,7 @@ namespace Shiva.ItemPlacing {
 				if (Input.GetMouseButtonUp (0)) {
 					SetCollider (targetObject, true);
 					targetObject.GetComponent<PlaceItem> ().EndEditing ();
+					undoButton.interactable = targetObject.GetComponent<PlaceItem> ().IsUndoable ();
 				}
 			}
 
@@ -377,6 +425,7 @@ namespace Shiva.ItemPlacing {
 				if (Input.GetMouseButtonUp (0)) {
 					SetCollider (targetObject, true);
 					targetObject.GetComponent<PlaceItem> ().EndEditing ();
+					undoButton.interactable = targetObject.GetComponent<PlaceItem> ().IsUndoable ();
 				}
 			}
 		}
@@ -387,6 +436,7 @@ namespace Shiva.ItemPlacing {
 
 			if (targetObject != null) {
 				targetObject.GetComponent<PlaceItem> ().EditUndo ();
+				undoButton.interactable = targetObject.GetComponent<PlaceItem> ().IsUndoable ();
 			}
 		}
 
@@ -402,11 +452,25 @@ namespace Shiva.ItemPlacing {
 			}
 		}
 
-		public void ShowSaveDialog ()
-		{
-			wasPointerDownInUI = false;
+		public void DeleteAll(){
+			foreach (PlaceItem pi in placedItems) {
+				GameObject.Destroy (pi.gameObject);
+			}
+			placedItems.Clear ();
+			
+			SetTarget (null);
+		}
 
-			List<PlaceItemData> data = new List<PlaceItemData> ();
+		public void Duplicate(){
+			if (targetObject != null) {
+				CreatePlaceItemInstance(targetObject.GetComponent<PlaceItem>());
+				SetTarget(targetObject);
+			}
+		}
+
+		private List<PlaceItemData> CreateDataForSerialization ()
+		{
+			List<PlaceItemData> data =  new List<PlaceItemData> ();
 
 			foreach (PlaceItem pi in placedItems) {
 				PlaceItemData pid = new PlaceItemData ();
@@ -415,9 +479,22 @@ namespace Shiva.ItemPlacing {
 				pid.rot = pi.transform.rotation;
 				pid.scale = pi.transform.localScale;
 
+				PlaceItemExtension[] exts = pi.GetComponents<PlaceItemExtension>();
+				foreach(PlaceItemExtension ext in exts){
+					pid.extensions.Add(ext.GetType().ToString(), ext.ToString());
+				}
+				
 				data.Add (pid);
 			}
 
+			return data;
+		}
+
+		public void ShowSaveDialog ()
+		{
+			wasPointerDownInUI = false;
+
+			List<PlaceItemData> data = CreateDataForSerialization ();
 			dataSaveLoad.ShowSaveDialog (data, folder);
 		}
 
@@ -435,15 +512,14 @@ namespace Shiva.ItemPlacing {
 			public Quaternion rot;
 			public Vector3 scale;
 			public string itemName;
+
+			public SerializableDictionary<string, string>  extensions = new SerializableDictionary<string, string>();
 		}
 
 		public void DataLoaded (object data)
 		{
 
-			foreach (PlaceItem pi in placedItems) {
-				GameObject.Destroy (pi.gameObject);
-			}
-			placedItems.Clear ();
+			DeleteAll ();
 				
 			List<PlaceItemData> pids = data as List<PlaceItemData>;
 			if (pids == null)
@@ -451,6 +527,8 @@ namespace Shiva.ItemPlacing {
 
 			foreach (PlaceItemData pid in pids) {
 				PlaceItem pi = placeItems.GetItemByName (pid.itemName.Trim ());
+				if(pi == null)
+					continue;
 					
 				if (Network.isServer || Network.isClient)
 					targetObject = (GameObject)Network.Instantiate (pi.gameObject, Vector3.zero, 
@@ -461,6 +539,11 @@ namespace Shiva.ItemPlacing {
 				targetObject.transform.position = pid.loc;
 				targetObject.transform.rotation = pid.rot;
 				targetObject.transform.localScale = pid.scale;
+
+				PlaceItemExtension[] pies = targetObject.GetComponents<PlaceItemExtension>();
+				foreach(PlaceItemExtension pie in pies){
+					pie.FromString(pid.extensions[pie.GetType().ToString()]);
+				}
 					
 				placedItems.Add (targetObject.GetComponent<PlaceItem> ());
 			}

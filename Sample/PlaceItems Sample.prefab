@@ -41,6 +41,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   placeItems:
   - {fileID: 11468058, guid: a28949318426c4283a8239e9d9ee87ba, type: 2}
+  - {fileID: 11468058, guid: 2fe22ea0797c14e3088d68fe11ccc514, type: 2}
+  - {fileID: 11472794, guid: ee773f0685c4a453092e09df9694ccd2, type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

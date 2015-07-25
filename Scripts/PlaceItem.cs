@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 //using System.Collections;
 using System.Collections.Generic;
+using Shiva.ItemPlacing;
 
 public class PlaceItem : MonoBehaviour
 {
@@ -13,65 +14,113 @@ public class PlaceItem : MonoBehaviour
 	public bool scalable = true;
 	public bool commnetable = true;
 
-	private Stack<LocRotScale> undoStack;
+	private Stack<List<SerializablePart>> undoStack = new Stack<List<SerializablePart>> ();
 
 	public string itemName;
 
 	[System.Serializable]
-	private class LocRotScale{
+	private class LocRotScale : SerializablePart{
 		public Vector3 loc;
 		public Quaternion rot;
 		public Vector3 scale;
+
+		[System.NonSerialized]
+		public Transform to;
+
+		public static LocRotScale Copy (Transform o)
+		{
+			LocRotScale lrs = new LocRotScale ();
+			
+			lrs.loc = Copy(o.position);
+			lrs.rot = Copy(o.rotation);
+			lrs.scale = Copy(o.localScale);
+			
+			return lrs;
+		}
+
+		public override object StartEditing (PlaceItemExtension pie)
+		{
+			loc = pie.transform.position;
+			rot = pie.transform.rotation;
+			scale = pie.transform.localScale;
+
+			return this;
+		}
+
+		public override void EndEditing ()
+		{
+		}
+
+		public override void Undo (GameObject o)
+		{
+			o.transform.position = loc;
+			o.transform.rotation = rot;
+			o.transform.localScale = scale;
+		}
+
+		public override bool HasChanged ()
+		{
+			return to.position != loc || to.rotation != rot || to.localScale != scale;
+		}
 	}
 
-	private LocRotScale lrs;
+	private List<SerializablePart> selParts = new List<SerializablePart>();
+
 	public void StartEditing(){
-		lrs = new LocRotScale ();
-		lrs.loc = Copy(transform.position);
-		lrs.rot = Copy(transform.rotation);
-		lrs.scale = Copy(transform.localScale);
-	}
+		
+		selParts.Clear ();
 
-	private Vector3 Copy(Vector3 v){
-		Vector3 v2 = new Vector3 ();
-		v2.x = v.x;
-		v2.y = v.y;
-		v2.z = v.z;
-		return v2;
-	}
+		LocRotScale lrs = LocRotScale.Copy (transform);
+		lrs.to = transform;
+		selParts.Add (lrs);
 
-	private Quaternion Copy(Quaternion v){
-		Quaternion v2 = new Quaternion ();
-		v2.x = v.x;
-		v2.y = v.y;
-		v2.z = v.z;
-		v2.w = v.w;
-		return v2;
+		PlaceItemExtension[] pies = GetComponents<PlaceItemExtension> ();
+		foreach (PlaceItemExtension pie in pies) {
+			SerializablePart cp = pie.GetCopy().StartEditing(pie) as SerializablePart;
+			selParts.Add (cp);
+		}
+
 	}
 
 	public void EndEditing(){
-		if (lrs.loc == transform.position && lrs.rot == transform.rotation && lrs.scale == transform.localScale)
+
+		bool flag = false;
+		foreach (SerializablePart sp in selParts) {
+			if(sp.HasChanged()){
+				flag = true;
+			}
+			sp.EndEditing();
+		}
+
+		if (!flag)
 			return;
+
+		List<SerializablePart> sps = new List<SerializablePart> ();
+		sps.AddRange (selParts);
 		
-		undoStack.Push (lrs);
+		undoStack.Push (sps);
+		FindObjectOfType<PlaceItemMaster>().undoButton.interactable = IsUndoable ();
+
+		StartEditing ();
 	}
 
+	public bool IsUndoable(){
+		return undoStack.Count > 0;
+	}
 
 	public void EditUndo(){
-		if (undoStack.Count > 0) {
-			print ("Undo");
+		if (IsUndoable()) {
 
-			LocRotScale lrs = undoStack.Pop ();
-			transform.position = lrs.loc;
-			transform.rotation = lrs.rot;
-			transform.localScale = lrs.scale;
+			List<SerializablePart> lrs = undoStack.Pop ();
+			foreach(SerializablePart sp in lrs)
+				sp.Undo(gameObject);
+
 		}
 	}
 
 
 	void Start ()
 	{
-		undoStack = new Stack<LocRotScale> ();
 		if (itemName == null || itemName.Length <= 0) {
 			itemName = gameObject.name;
 		}
