@@ -92,6 +92,7 @@ namespace Shiva.ItemPlacing {
 				int num = idx++;
 				b.onClick.AddListener(() => {
 					chosenColor = num;
+					print (targetMaterial.name+":"+targetMaterial.GetHashCode());
 					targetMaterial.color = b.image.color;
 					gameObject.GetComponent<PlaceItem> ().EndEditing ();
 				});
@@ -103,22 +104,43 @@ namespace Shiva.ItemPlacing {
 
 		// Use this for initialization
 		void Awake () {
-			Material mat = new Material (targetMaterial);
-			mat.name = mat.name + "_Copied";
 
-			Renderer[] rs = GetComponentsInChildren<Renderer> ();
-			foreach (Renderer r in rs) {
-				Material[] mats = r.materials;
-				for(int i=0;i<mats.Length;i++){
-					Material m = mats[i];
-					if(m.name.StartsWith(targetMaterial.name)){
-						mats[i] = mat;
+			print (targetMaterial.name);
+			Material mat = null;
+			{
+				Renderer[] rs = GetComponentsInChildren<Renderer> ();
+				foreach (Renderer r in rs) {
+					Material[] mats = r.sharedMaterials;
+					for (int i=0; i<mats.Length; i++) {
+						Material m = mats [i];
+						if (m.name.StartsWith (targetMaterial.name) && m.name.Contains ("_Copied")) {
+							targetMaterial = m;
+							mat = targetMaterial;
+							break;
+						}
 					}
 				}
-				r.materials = mats;
+			}
+			
+			if (mat == null) {
+				mat = new Material (targetMaterial);
+				mat.name = mat.name + "_Copied";
+			}
+			{
+				Renderer[] rs = GetComponentsInChildren<Renderer> ();
+				foreach (Renderer r in rs) {
+					Material[] mats = r.materials;
+					for (int i=0; i<mats.Length; i++) {
+						Material m = mats [i];
+						if (m.name.StartsWith (targetMaterial.name)) {
+							mats [i] = mat;
+						}
+					}
+					r.materials = mats;
+				}
+				targetMaterial = mat;
 			}
 
-			targetMaterial = mat;
 			chosenColor = 0;
 			targetMaterial.color = colors [chosenColor];
 		

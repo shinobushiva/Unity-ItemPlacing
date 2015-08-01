@@ -189,7 +189,7 @@ namespace Shiva.ItemPlacing {
 			selectedTarget.text = "" + placedItems.Count + " items are placed";
 			selectedTarget.color = Color.white;
 
-			RectTransform[] recs = extensionPanel.GetComponentsInChildren<RectTransform>();
+			RectTransform[] recs = extensionPanel.GetComponentsInChildren<RectTransform>(true);
 			foreach(RectTransform rec in recs){
 				if(rec != extensionPanel)
 					Destroy(rec.gameObject);
@@ -542,6 +542,9 @@ namespace Shiva.ItemPlacing {
 
 				PlaceItemExtension[] pies = targetObject.GetComponents<PlaceItemExtension>();
 				foreach(PlaceItemExtension pie in pies){
+					if(!pid.extensions.ContainsKey(pie.GetType().ToString()))
+						continue;
+
 					pie.FromString(pid.extensions[pie.GetType().ToString()]);
 				}
 					

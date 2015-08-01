@@ -197,6 +197,7 @@ MonoBehaviour:
   - {r: 1, g: 1, b: 1, a: 1}
   - {r: 0, g: 0, b: 0, a: 1}
   targetMaterial: {fileID: 2100000, guid: de7ffc4d557124f0f8ff19f9c578e333, type: 2}
+  chosenColor: 0
 --- !u!114 &11439688
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -243,12 +244,37 @@ Prefab:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 0}
+      propertyPath: textures.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
       propertyPath: parts.Array.data[0].name
       value: Top
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: itemName
       value: Sample Cube Combined
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: textures.Array.data[0]
+      value: 
+      objectReference: {fileID: 2800000, guid: 53cdc74a699d14cfca8144624b3d2076, type: 3}
+    - target: {fileID: 0}
+      propertyPath: textures.Array.data[1]
+      value: 
+      objectReference: {fileID: 2800000, guid: ee71feb7b9b734568b05a993220bf8fa, type: 3}
+    - target: {fileID: 0}
+      propertyPath: targetMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: de7ffc4d557124f0f8ff19f9c578e333, type: 2}
+    - target: {fileID: 0}
+      propertyPath: extensionPanel
+      value: 
+      objectReference: {fileID: 22405262, guid: a2d957811799e44999186076fd698114,
+        type: 2}
+    - target: {fileID: 0}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9af5ce67b50fc494580d7cc7ca43baa2
+timeCreated: 1438264454
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - extensionPanel: {fileID: 22405262, guid: a2d957811799e44999186076fd698114, type: 2}
+  - targetMaterial: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
