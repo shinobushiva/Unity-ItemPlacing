@@ -6,6 +6,8 @@ public class CommentObject : MonoBehaviour {
 	public CommentPanel commentPanel;
 	public string objectId;
 
+	public VisibilityReport vr;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -15,4 +17,6 @@ public class CommentObject : MonoBehaviour {
 	void Update () {
 	
 	}
+
+
 }

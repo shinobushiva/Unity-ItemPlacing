@@ -10,6 +10,7 @@ public class CommentDelegateSample : MonoBehaviour {
 	void Start () {
 		master.onCommentAdded += OnCommentAdded;
 		master.onCommentDeleted += OnCommentDeleted;
+
 	}
 	
 	// Update is called once per frame

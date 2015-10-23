@@ -17,6 +17,7 @@ public class CommentPanel : MonoBehaviour {
 	public CanvasScaler scalar;
 
 	public Text text;
+	public string commentType;
 
 	private CameraSwitcher switcher;
 
@@ -33,11 +34,19 @@ public class CommentPanel : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
 		Camera c = switcher.CurrentActive.c;
 
+		if (!commentObject.vr.visible || (Vector3.Distance(c.transform.position, target.position) > 50)) {
+			panelImage.enabled = false;
+			text.enabled = false;
+		} else {
+			panelImage.enabled = true;
+			text.enabled = true;
+		}
+
+
 		Vector2 of = offset;
-		Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(c, target.position);
+		Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(c, target.position+Vector3.up*2.5f);
 //		print (screenPoint);
 		
 		float xMag = scalar.referenceResolution.x/Screen.width;
