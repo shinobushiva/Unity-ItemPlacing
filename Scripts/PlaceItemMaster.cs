@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 namespace Shiva.ItemPlacing {
 	public class PlaceItemMaster : MethodAll
 	{
+		private GameObject selectionBox;
 
 		//
 		public DataSaveLoadMaster dataSaveLoad;
@@ -148,6 +149,14 @@ namespace Shiva.ItemPlacing {
 
 		private CameraSwitcher cameraSwitcher;
 		void Start(){
+
+			if (placeItems == null) {
+				placeItems =  new GameObject("Empty PlaceItems").AddComponent<PlaceItems>();
+			}
+
+			selectionBox = GameObject.CreatePrimitive (PrimitiveType.Cube);
+			Destroy(selectionBox.GetComponent<Collider>());
+
 			cameraSwitcher = FindObjectOfType<CameraSwitcher> ();
 	
 			foreach (PlaceItem pi in placeItems.placeItems) {
@@ -206,25 +215,26 @@ namespace Shiva.ItemPlacing {
 
 				undoButton.interactable = targetObject.GetComponent<PlaceItem> ().IsUndoable ();
 
-				PlaceItemExtension[] exts = targetObject.GetComponents<PlaceItemExtension>();
-				foreach(PlaceItemExtension pie in exts){
-					RectTransform rt = pie.GetEditorPanel();
-					rt.transform.SetParent(extensionPanel.transform, false);
+				PlaceItemExtension[] exts = targetObject.GetComponents<PlaceItemExtension> ();
+				foreach (PlaceItemExtension pie in exts) {
+					RectTransform rt = pie.GetEditorPanel ();
+					rt.transform.SetParent (extensionPanel.transform, false);
 				}
-			}
+			} 
+
+			UpdateSelectionBox ();
 
 		}
 
-	//	private bool WasJustADamnedButton()
-	//	{
-	//		UnityEngine.EventSystems.EventSystem ct
-	//			= UnityEngine.EventSystems.EventSystem.current;
-	//		
-	//		if (! ct.IsPointerOverGameObject() ) return false;
-	//		if (! ct.currentSelectedGameObject ) return false;
-	//
-	//		return true;
-	//	}
+		public void UpdateSelectionBox(){
+			if(targetObject != null){
+				Bounds b = Helper.GetBoundingBox (targetObject);
+				selectionBox.transform.position = b.center;
+				selectionBox.transform.localScale = b.size;
+			} else {
+				selectionBox.transform.localScale = Vector3.zero;
+			}
+		}
 
 		public PlaceItem PickItem ()
 		{
@@ -428,6 +438,8 @@ namespace Shiva.ItemPlacing {
 					undoButton.interactable = targetObject.GetComponent<PlaceItem> ().IsUndoable ();
 				}
 			}
+			
+			UpdateSelectionBox ();
 		}
 
 		public void EditUndo ()
