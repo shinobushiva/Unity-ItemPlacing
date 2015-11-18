@@ -11,6 +11,7 @@ namespace Shiva.ItemPlacing {
 	public class PlaceItemMaster : MethodAll
 	{
 		private GameObject selectionBox;
+		public Material selectionBoxMaterial;
 
 		//
 		public DataSaveLoadMaster dataSaveLoad;
@@ -155,6 +156,8 @@ namespace Shiva.ItemPlacing {
 			}
 
 			selectionBox = GameObject.CreatePrimitive (PrimitiveType.Cube);
+			selectionBox.name = "Selection Grid";
+			selectionBox.GetComponent<Renderer> ().sharedMaterial = selectionBoxMaterial;
 			Destroy(selectionBox.GetComponent<Collider>());
 
 			cameraSwitcher = FindObjectOfType<CameraSwitcher> ();
@@ -230,7 +233,7 @@ namespace Shiva.ItemPlacing {
 			if(targetObject != null){
 				Bounds b = Helper.GetBoundingBox (targetObject);
 				selectionBox.transform.position = b.center;
-				selectionBox.transform.localScale = b.size;
+				selectionBox.transform.localScale = b.size*1.1f;
 			} else {
 				selectionBox.transform.localScale = Vector3.zero;
 			}
