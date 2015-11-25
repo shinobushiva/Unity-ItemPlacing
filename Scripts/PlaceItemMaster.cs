@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 namespace Shiva.ItemPlacing {
 	public class PlaceItemMaster : MethodAll
 	{
-		private GameObject selectionBox;
+		public GameObject selectionBox;
 
 		//
 		public DataSaveLoadMaster dataSaveLoad;
@@ -154,8 +154,8 @@ namespace Shiva.ItemPlacing {
 				placeItems =  new GameObject("Empty PlaceItems").AddComponent<PlaceItems>();
 			}
 
-			selectionBox = GameObject.CreatePrimitive (PrimitiveType.Cube);
-			Destroy(selectionBox.GetComponent<Collider>());
+			selectionBox = Instantiate<GameObject> (selectionBox);
+//			Destroy(selectionBox.GetComponent<Collider>());
 
 			cameraSwitcher = FindObjectOfType<CameraSwitcher> ();
 	
