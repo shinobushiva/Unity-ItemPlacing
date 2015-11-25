@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 namespace Shiva.ItemPlacing {
 	public class PlaceItemMaster : MethodAll
 	{
+
 		public GameObject selectionBox;
 
 		//
@@ -155,7 +156,6 @@ namespace Shiva.ItemPlacing {
 			}
 
 			selectionBox = Instantiate<GameObject> (selectionBox);
-//			Destroy(selectionBox.GetComponent<Collider>());
 
 			cameraSwitcher = FindObjectOfType<CameraSwitcher> ();
 	
@@ -230,7 +230,7 @@ namespace Shiva.ItemPlacing {
 			if(targetObject != null){
 				Bounds b = Helper.GetBoundingBox (targetObject);
 				selectionBox.transform.position = b.center;
-				selectionBox.transform.localScale = b.size;
+				selectionBox.transform.localScale = b.size*1.1f;
 			} else {
 				selectionBox.transform.localScale = Vector3.zero;
 			}

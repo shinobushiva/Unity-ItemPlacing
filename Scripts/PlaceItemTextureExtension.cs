@@ -108,6 +108,7 @@ namespace Shiva.ItemPlacing {
 					Material[] mats = r.sharedMaterials;
 					for (int i=0; i<mats.Length; i++) {
 						Material m = mats [i];
+						print (m);
 						if (m.name.StartsWith (targetMaterial.name) && m.name.Contains ("_Copied")) {
 							targetMaterial = m;
 							mat = targetMaterial;
@@ -137,7 +138,8 @@ namespace Shiva.ItemPlacing {
 			}
 
 			chosenTexture = 0;
-			targetMaterial.mainTexture = textures [chosenTexture];
+			if(chosenTexture > textures.Length)
+				targetMaterial.mainTexture = textures [chosenTexture];
 		
 		}
 		
