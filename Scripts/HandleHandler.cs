@@ -9,6 +9,30 @@ using System.Xml.Serialization;
 
 namespace Shiva.ItemPlacing
 {
+
+	public class HandleCameraSync : MonoBehaviour{
+		Camera c;
+		CameraSwitcher switcher;
+
+		void Awake(){
+			c  = gameObject.AddComponent<Camera> ();
+			switcher = FindObjectOfType<CameraSwitcher> ();
+		}
+
+		public void SetLayer(int layer){
+			c.cullingMask = 1<<layer;
+			c.clearFlags = CameraClearFlags.Depth;
+			c.depth = 10;
+			c.useOcclusionCulling = false;
+		}
+
+		void Update(){
+			if (switcher.CurrentActive.c != null) {
+				switcher.CurrentActive.c.transform.CopyTo(c.transform);
+			}
+		}
+	}
+
 	[System.Serializable]
 	public class HandleHandler
 	{
@@ -30,6 +54,9 @@ namespace Shiva.ItemPlacing
 		public GameObject rotatePref;
 		public GameObject scalePref;
 
+
+
+
 		public HandleHandler ()
 		{
 		}
@@ -41,27 +68,47 @@ namespace Shiva.ItemPlacing
 			this.rotatePref = master.rotatePref;
 			this.scalePref = master.scalePref;
 
+			float trans = .8f;
+
 			xHandle = GameObject.Instantiate (movePref);
-			xHandle.GetComponent<Renderer> ().material.color = new Color (1, 0, 0, .2f);
+			xHandle.GetComponent<Renderer> ().material.color = new Color (1, 0, 0, trans);
 			xHandle.gameObject.name = "X Handle";
 			yHandle = GameObject.Instantiate (movePref);
-			yHandle.GetComponent<Renderer> ().material.color  = new Color (0, 1, 0, .2f);
+			yHandle.GetComponent<Renderer> ().material.color  = new Color (0, 1, 0, trans);
 			yHandle.gameObject.name = "Y Handle";
 			zHandle = GameObject.Instantiate (movePref);
-			zHandle.GetComponent<Renderer> ().material.color = new Color (0, 0, 1, .2f);
+			zHandle.GetComponent<Renderer> ().material.color = new Color (0, 0, 1, trans);
 			zHandle.gameObject.name = "Z Handle";
 
 			xRotateHandle = GameObject.Instantiate (rotatePref);
-			xRotateHandle.GetComponent<Renderer> ().material.color = new Color (1, 0, 0, .2f);
+			xRotateHandle.GetComponent<Renderer> ().material.color = new Color (1, 0, 0, trans);
 			xRotateHandle.gameObject.name = "X Rotate Handle";
 			yRotateHandle = GameObject.Instantiate (rotatePref);
-			yRotateHandle.GetComponent<Renderer> ().material.color  = new Color (0, 1, 0, .2f);
+			yRotateHandle.GetComponent<Renderer> ().material.color  = new Color (0, 1, 0, trans);
 			yRotateHandle.gameObject.name = "Y Rotate Handle";
 			zRotateHandle = GameObject.Instantiate (rotatePref);
-			zRotateHandle.GetComponent<Renderer> ().material.color = new Color (0, 0, 1, .2f);
+			zRotateHandle.GetComponent<Renderer> ().material.color = new Color (0, 0, 1, trans);
 			zRotateHandle.gameObject.name = "Z Rotate Handle";
 			
 //			plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
+
+//			GameObject go = new GameObject ("Handle Camera");
+//			HandleCameraSync hcs = go.AddComponent<HandleCameraSync> ();
+//
+//			int layer = LayerMask.NameToLayer("ItemPlacing");
+//			if (layer == -1)
+//				Debug.Log ("Create layer named 'ItemPlacing'.");
+//			else {
+//				xHandle.SetLayerRecursively (layer);
+//				yHandle.SetLayerRecursively (layer);
+//				zHandle.SetLayerRecursively (layer);
+//				xRotateHandle.SetLayerRecursively (layer);
+//				yRotateHandle.SetLayerRecursively (layer);
+//				zRotateHandle.SetLayerRecursively (layer);
+//				go.SetLayerRecursively (layer);
+//				hcs.SetLayer(layer);
+//			}
+
 		}
 
 		private GameObject targetObject;
@@ -270,7 +317,7 @@ namespace Shiva.ItemPlacing
 				Vector3 s2 = c.WorldToScreenPoint (pickPos + targetObject.transform.right);
 				Vector3 s3 = c.WorldToScreenPoint (pickPos - targetObject.transform.right);
 				Vector3 s4 = c.WorldToScreenPoint (master.selectionBox.transform.position);
-				
+
 				float dist = (prevPosOnScreen - Input.mousePosition).magnitude;
 
 				Vector3 v = s4 - Input.mousePosition;

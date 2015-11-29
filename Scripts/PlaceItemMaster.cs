@@ -53,6 +53,9 @@ namespace Shiva.ItemPlacing
 		//
 		public RectTransform extensionPanel;
 
+		//
+		public Canvas root;
+
 		[System.Serializable]
 		public enum State
 		{
@@ -82,6 +85,8 @@ namespace Shiva.ItemPlacing
 			}
 			set {
 				selection = value;
+				if(!selection)
+					SetTarget(null);
 			}
 		}
 		
@@ -210,6 +215,10 @@ namespace Shiva.ItemPlacing
 
 		private void SetTarget (GameObject t)
 		{
+			if (targetObject) {
+				SetCollider (targetObject, true);
+			}
+
 			targetObject = t;
 			selectedTarget.text = "" + placedItems.Count + " items are placed";
 			selectedTarget.color = Color.white;
@@ -290,11 +299,14 @@ namespace Shiva.ItemPlacing
 		// Update is called once per frame
 		void Update ()
 		{
-			if (selectionBox != null & targetObject != null) {
-				Debug.DrawLine (selectionBox.transform.position, selectionBox.transform.position + targetObject.transform.right * 10, Color.red);
-				//targetObject.transform.RotateAround(selectionBox.transform.position, targetObject.transform.right, 10*Time.deltaTime);
-			}
+//			if (selectionBox != null & targetObject != null) {
+//				Debug.DrawLine (selectionBox.transform.position, selectionBox.transform.position + targetObject.transform.right * 10, Color.red);
+//				//targetObject.transform.RotateAround(selectionBox.transform.position, targetObject.transform.right, 10*Time.deltaTime);
+//			}
 
+			if (!root.enabled) {
+				SetTarget(null);
+			}
 
 			handler.Update(targetObject);
 
