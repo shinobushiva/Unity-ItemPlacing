@@ -92,7 +92,7 @@ namespace Shiva.ItemPlacing {
 				int num = idx++;
 				b.onClick.AddListener(() => {
 					chosenColor = num;
-					print (targetMaterial.name+":"+targetMaterial.GetHashCode());
+//					print (targetMaterial.name+":"+targetMaterial.GetHashCode());
 					targetMaterial.color = b.image.color;
 					gameObject.GetComponent<PlaceItem> ().EndEditing ();
 				});
