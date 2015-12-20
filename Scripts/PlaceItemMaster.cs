@@ -242,6 +242,7 @@ namespace Shiva.ItemPlacing
 
 				PlaceItemExtension[] exts = targetObject.GetComponents<PlaceItemExtension> ();
 				foreach (PlaceItemExtension pie in exts) {
+					
 					RectTransform rt = pie.GetEditorPanel ();
 					rt.transform.SetParent (extensionPanel.transform, false);
 				}
@@ -564,7 +565,13 @@ namespace Shiva.ItemPlacing
 
 				PlaceItemExtension[] exts = pi.GetComponents<PlaceItemExtension> ();
 				foreach (PlaceItemExtension ext in exts) {
-					pid.extensions.Add (ext.GetType ().ToString (), ext.ToString ());
+
+					string n = ext.dictionaryName;
+					if (n == null || n.Length == 0) {
+						n = ext.GetType ().ToString ();
+					}
+
+					pid.extensions.Add (n, ext.ToString ());
 				}
 				
 				data.Add (pid);
@@ -624,10 +631,15 @@ namespace Shiva.ItemPlacing
 
 				PlaceItemExtension[] pies = targetObject.GetComponents<PlaceItemExtension> ();
 				foreach (PlaceItemExtension pie in pies) {
-					if (!pid.extensions.ContainsKey (pie.GetType ().ToString ()))
+					string n = pie.dictionaryName;
+					if (n == null || n.Length == 0) {
+						n = pie.GetType ().ToString ();
+					}
+
+					if (!pid.extensions.ContainsKey (n))
 						continue;
 
-					pie.FromString (pid.extensions [pie.GetType ().ToString ()]);
+					pie.FromString (pid.extensions [n]);
 				}
 					
 				placedItems.Add (targetObject.GetComponent<PlaceItem> ());

@@ -66,6 +66,8 @@ public class PlaceItem : MonoBehaviour
 
 	private List<SerializablePart> selParts = new List<SerializablePart>();
 
+	private PlaceItemExtension[] pies;
+
 	public void StartEditing(){
 		
 		selParts.Clear ();
@@ -74,7 +76,7 @@ public class PlaceItem : MonoBehaviour
 		lrs.to = transform;
 		selParts.Add (lrs);
 
-		PlaceItemExtension[] pies = GetComponents<PlaceItemExtension> ();
+		pies = GetComponents<PlaceItemExtension> ();
 		foreach (PlaceItemExtension pie in pies) {
 			SerializablePart cp = pie.GetCopy().StartEditing(pie) as SerializablePart;
 			selParts.Add (cp);

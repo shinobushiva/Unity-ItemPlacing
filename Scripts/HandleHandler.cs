@@ -17,18 +17,27 @@ namespace Shiva.ItemPlacing
 		void Awake(){
 			c  = gameObject.AddComponent<Camera> ();
 			switcher = FindObjectOfType<CameraSwitcher> ();
+
+			c.depth = 100;
 		}
 
 		public void SetLayer(int layer){
-			c.cullingMask = 1<<layer;
+
+			int mask = LayerMask.GetMask(LayerMask.LayerToName(layer));
+			c.cullingMask = mask;
 			c.clearFlags = CameraClearFlags.Depth;
-			c.depth = 10;
+			c.depth = 100;
 			c.useOcclusionCulling = false;
 		}
 
 		void Update(){
 			if (switcher.CurrentActive.c != null) {
 				switcher.CurrentActive.c.transform.CopyTo(c.transform);
+//				c.projectionMatrix = switcher.CurrentActive.c.projectionMatrix;
+				c.orthographic = switcher.CurrentActive.c.orthographic;
+				c.nearClipPlane = switcher.CurrentActive.c.nearClipPlane;
+				c.farClipPlane = switcher.CurrentActive.c.farClipPlane;
+				c.fieldOfView = switcher.CurrentActive.c.fieldOfView;
 			}
 		}
 	}
@@ -61,8 +70,16 @@ namespace Shiva.ItemPlacing
 		{
 		}
 
+		private HandleCameraSync hcs;
+		private int layer;
+
 		public void Init (PlaceItemMaster master)
 		{
+			GameObject hc = new GameObject ("Handle Camera", typeof(HandleCameraSync));
+			layer = LayerMask.NameToLayer ("ItemHandle");
+			hcs = hc.GetComponent<HandleCameraSync> ();
+			hcs.SetLayer (layer);
+
 			this.master = master;
 			this.movePref = master.movePref;
 			this.rotatePref = master.rotatePref;
@@ -89,25 +106,13 @@ namespace Shiva.ItemPlacing
 			zRotateHandle = GameObject.Instantiate (rotatePref);
 			zRotateHandle.GetComponent<Renderer> ().material.color = new Color (0, 0, 1, trans);
 			zRotateHandle.gameObject.name = "Z Rotate Handle";
-			
-//			plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
 
-//			GameObject go = new GameObject ("Handle Camera");
-//			HandleCameraSync hcs = go.AddComponent<HandleCameraSync> ();
-//
-//			int layer = LayerMask.NameToLayer("ItemPlacing");
-//			if (layer == -1)
-//				Debug.Log ("Create layer named 'ItemPlacing'.");
-//			else {
-//				xHandle.SetLayerRecursively (layer);
-//				yHandle.SetLayerRecursively (layer);
-//				zHandle.SetLayerRecursively (layer);
-//				xRotateHandle.SetLayerRecursively (layer);
-//				yRotateHandle.SetLayerRecursively (layer);
-//				zRotateHandle.SetLayerRecursively (layer);
-//				go.SetLayerRecursively (layer);
-//				hcs.SetLayer(layer);
-//			}
+			xHandle.SetLayerRecursively (layer);
+			yHandle.SetLayerRecursively (layer);
+			zHandle.SetLayerRecursively (layer);
+			xRotateHandle.SetLayerRecursively (layer);
+			yRotateHandle.SetLayerRecursively (layer);
+			zRotateHandle.SetLayerRecursively (layer);
 
 		}
 
@@ -124,7 +129,7 @@ namespace Shiva.ItemPlacing
 
 		public void Update (GameObject targetObject)
 		{
-
+			
 			this.targetObject = targetObject;
 
 			xHandle.gameObject.SetActive (false);
@@ -141,17 +146,18 @@ namespace Shiva.ItemPlacing
 				Bounds b = Helper.GetBoundingBox (master.selectionBox);
 				master.selectionBox.transform.rotation = rot;
 
-//				b = master.selectionBox.GetComponent<Renderer>().bounds;
+				float dist = Vector3.Distance (hcs.transform.position, targetObject.transform.position);
 
 				if(master.editState == PlaceItemMaster.State.Moving){
 					xHandle.gameObject.SetActive (true);
 					yHandle.gameObject.SetActive (true);
 					zHandle.gameObject.SetActive (true);
 
-					float r = b.extents.magnitude/4;
-					xHandle.transform.localScale = new Vector3 (r, r*8, r);
-					yHandle.transform.localScale = new Vector3 (r, r*8, r);
-					zHandle.transform.localScale = new Vector3 (r, r*8, r);
+					float r = dist * Mathf.Cos(hcs.GetComponent<Camera>().fieldOfView)/10;
+					float rs = r / 10;
+					xHandle.transform.localScale = new Vector3 (rs, r, rs);
+					yHandle.transform.localScale = new Vector3 (rs, r, rs);
+					zHandle.transform.localScale = new Vector3 (rs, r, rs);
 
 				
 					xHandle.transform.position = b.center;
@@ -171,8 +177,8 @@ namespace Shiva.ItemPlacing
 					xRotateHandle.gameObject.SetActive (true);
 					yRotateHandle.gameObject.SetActive (true);
 					zRotateHandle.gameObject.SetActive (true);
-					
-					float r = b.extents.magnitude;
+
+					float r = dist/10;
 					xRotateHandle.transform.localScale = new Vector3 (r, r, r);
 					yRotateHandle.transform.localScale = new Vector3 (r, r, r);
 					zRotateHandle.transform.localScale = new Vector3 (r, r, r);
@@ -197,7 +203,8 @@ namespace Shiva.ItemPlacing
 			bool b;
 			Ray ray = c.ScreenPointToRay (Input.mousePosition);
 			RaycastHit hit;
-			b = Physics.Raycast (ray, out hit);
+			int mask = LayerMask.GetMask(LayerMask.LayerToName(layer));
+			b = Physics.Raycast (ray, out hit, int.MaxValue, mask);
 			if (b) {
 				GameObject go = hit.transform.gameObject;
 

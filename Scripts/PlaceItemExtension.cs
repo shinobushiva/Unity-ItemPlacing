@@ -4,6 +4,8 @@ using System.Collections;
 namespace Shiva.ItemPlacing {
 	public class PlaceItemExtension : MonoBehaviour {
 
+		public string dictionaryName;
+
 		public virtual RectTransform GetEditorPanel(){
 			return null;
 		}
