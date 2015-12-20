@@ -29,15 +29,14 @@ namespace Shiva.ItemPlacing
 		private class SerializableParts : SerializablePart
 		{
 
-			public bool[] flags;
 
 			[System.NonSerialized]
 			[XmlIgnore]
-			private PlaceItemPartingExtension pice;
+			private PlaceItemCharacterExtension pice;
 
 			public override object StartEditing (PlaceItemExtension pie)
 			{
-				pice = pie as PlaceItemPartingExtension;
+				pice = pie as PlaceItemCharacterExtension;
 
 				return this;
 
@@ -67,32 +66,27 @@ namespace Shiva.ItemPlacing
 
 		public override void FromString (string part)
 		{
-			string[] names = part.Split (',');
-			
-//			foreach (Part p in characters) {
-//				if(names.Contains(p.name)){
-//					p.active = true;
-//					p.target.SetActive(true);
-//				}else{
-//					p.active = false;
-//					p.target.SetActive(false);
-//				}
-//			}
+			string name = part;
+
+			int idx = 0;
+			foreach (Part p in characters) {
+				if(p.name == name){
+					SetCurrentCharacter (idx);
+					break;
+				}
+				idx++;
+			}
 		}
 
 		public override string ToString ()
 		{
-			string str = " ";
-			foreach (Part p in characters) {
-				if (p.active)
-					str += p.name + ",";
-			}
-
-			return str.Substring (0, str.Length - 1).TrimStart ();
+			return characters[currentCharacterIndex].name;
 		}
 
 		void SetCurrentCharacter (int num)
 		{
+			currentCharacterIndex = num;
+
 			Animator animator = null;
 			if (currentCharacter) {
 				animator = currentCharacter.GetComponent<Animator> ();
@@ -115,7 +109,6 @@ namespace Shiva.ItemPlacing
 		{
 			RectTransform rect = GameObject.Instantiate<RectTransform> (extensionPanel);
 			Toggle buttonPref = rect.GetComponentInChildren<Toggle> ();
-			List<Toggle> buttons = new List<Toggle> ();
 
 			int idx = 0;
 			foreach (Part c in characters) {
@@ -133,7 +126,6 @@ namespace Shiva.ItemPlacing
 				b.onValueChanged.AddListener ((onOff) => {
 					if (onOff) {
 						SetCurrentCharacter (num);
-						currentCharacterIndex = num;
 					}
 				});
 			}
@@ -141,18 +133,8 @@ namespace Shiva.ItemPlacing
 
 			return rect;
 		}
-
-		// Use this for initialization
-		void Awake ()
-		{
 			
-//			foreach (Part c in characters) {
-//				c.target.SetActive(c.active);
-//			}
-		
-		}
-
-		void Start ()
+		void Awale ()
 		{
 			SetCurrentCharacter (0);
 		}

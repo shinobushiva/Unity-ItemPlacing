@@ -279,6 +279,11 @@ namespace Shiva.ItemPlacing
 
 		public PlaceItem PickItem ()
 		{
+
+			if (!root.enabled) {
+				return null;
+			}
+			
 			bool b;
 			Ray ray = cameraSwitcher.CurrentActive.c.ScreenPointToRay (Input.mousePosition);
 			RaycastHit hit;

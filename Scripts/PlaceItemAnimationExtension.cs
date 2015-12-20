@@ -39,18 +39,17 @@ namespace Shiva.ItemPlacing
 		private class SerializableParts : SerializablePart
 		{
 
-			public bool[] flags;
+			public string data;
 
 			[System.NonSerialized]
 			[XmlIgnore]
-			private PlaceItemPartingExtension pice;
+			private PlaceItemAnimationExtension piae;
 
 			public override object StartEditing (PlaceItemExtension pie)
 			{
-				pice = pie as PlaceItemPartingExtension;
-
+				piae = pie as PlaceItemAnimationExtension;
+				data = piae.ToString ();
 				return this;
-
 			}
 
 			public override void EndEditing ()
@@ -59,12 +58,12 @@ namespace Shiva.ItemPlacing
 
 			public override void Undo (GameObject o)
 			{
-
+				piae.FromString (data);
 			}
 
 			public override bool HasChanged ()
 			{
-				return false;
+				return data != piae.ToString();
 			}
 
 		}
@@ -78,25 +77,35 @@ namespace Shiva.ItemPlacing
 		public override void FromString (string part)
 		{
 			string[] names = part.Split (',');
-			
-//			foreach (Part p in characters) {
-//				if(names.Contains(p.name)){
-//					p.active = true;
-//					p.target.SetActive(true);
-//				}else{
-//					p.active = false;
-//					p.target.SetActive(false);
-//				}
-//			}
+			if (names.Length < 2)
+				return;
+
+			for (int i = 0; i < names.Length; i+=2) {
+				string tn = names [i];
+				string an = names [i + 1];
+				foreach (TargetPart tp in targetParts) {
+					if (tp.name == tn) {
+						int idx = 0;
+						foreach (AnimationPart ap in tp.clips) {
+							if (ap.name == an) {
+								tp.currentClipIndex = idx;
+							}
+							idx++;
+						}
+					}
+				}
+				ReplaceClip ();
+			}
+
 		}
 
 		public override string ToString ()
 		{
 			string str = " ";
-//			foreach (Part p in characters) {
-//				if (p.active)
-//					str += p.name + ",";
-//			}
+			foreach (TargetPart tp in targetParts) {
+				AnimationPart ap = tp.clips [tp.currentClipIndex];
+				str += tp.name + "," + ap.name+",";
+			}
 
 			return str.Substring (0, str.Length - 1).TrimStart ();
 		}
@@ -108,15 +117,6 @@ namespace Shiva.ItemPlacing
 
 			Animator m_animator = GetComponentInChildren<Animator>();
 
-			AnimatorClipInfo[] c1 = m_animator.GetCurrentAnimatorClipInfo (1);
-			AnimatorClipInfo[] c2 = m_animator.GetCurrentAnimatorClipInfo (2);
-			if (c1.Length > 0) {
-				print ("clip1="+c1 [0].clip);
-				print ("clip2="+c2 [0].clip);
-			}
-		
-			print (m_animator.runtimeAnimatorController);
-
 			m_animator.runtimeAnimatorController = animController;
 			m_overrideController = new AnimatorOverrideController ();
 			m_overrideController.runtimeAnimatorController = m_animator.runtimeAnimatorController;
@@ -126,7 +126,6 @@ namespace Shiva.ItemPlacing
 			foreach (AnimationClip ac in cs) {
 				print (ac);
 			}
-
 
 			if (m_overrideController) {
 				foreach (TargetPart tp in targetParts) {
@@ -157,7 +156,6 @@ namespace Shiva.ItemPlacing
 				tg.GetComponentInChildren<Text> ().text = tp.name;
 
 				Toggle buttonPref = tg.GetComponentInChildren<Toggle> ();
-				List<Toggle> buttons = new List<Toggle> ();
 				
 
 				int idx = 0;
@@ -195,25 +193,20 @@ namespace Shiva.ItemPlacing
 			return rect;
 		}
 
-		// Use this for initialization
-		void Awake ()
-		{
-			
-//			foreach (Part c in characters) {
-//				c.target.SetActive(c.active);
-//			}
-		
-		}
-
 		void Start ()
 		{
 			ReplaceClip ();
 		}
+
+		bool playStarted = false;
 		
 		// Update is called once per frame
 		void Update ()
 		{
-		
+			if (!playStarted) {
+				ReplaceClip ();
+				playStarted = true;
+			}
 		}
 	}
 }
