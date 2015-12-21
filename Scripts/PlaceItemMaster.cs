@@ -472,24 +472,22 @@ namespace Shiva.ItemPlacing
 			if (EditState == State.Scaling) {
 				if (!targetObject)
 					return;
-				
+
+
 				if (Input.GetMouseButton (0)) {
 					if(handler.handle != null){
 						handler.MoveHandle (cameraSwitcher.CurrentActive.c);
 						return;
 					}
 
-					Vector3 s1 = cameraSwitcher.CurrentActive.c.WorldToScreenPoint (pressedMousePosition);
-					Vector3 s2 = cameraSwitcher.CurrentActive.c.WorldToScreenPoint (pressedMousePosition + targetObject.transform.forward);
-					Vector3 s3 = cameraSwitcher.CurrentActive.c.WorldToScreenPoint (pressedMousePosition - targetObject.transform.forward);
-					float dist = (pressedMousePosition - Input.mousePosition).magnitude;
-					if (Vector3.Distance (Input.mousePosition, s2) > Vector3.Distance (Input.mousePosition, s3)) {
-						dist = -dist;
-					} 
+					float xd = Input.mousePosition.x - pressedMousePosition.x;
+					float yd = Input.mousePosition.y - pressedMousePosition.y;
+					float ddd = xd + yd;
 
-					float d = dist / Vector3.Distance (s1, s2)/2;
-					
+					float d = Mathf.Log10(ddd);
+
 					Vector3 axis = targetScale * d;
+
 					if (!xEnabled)
 						axis.x = targetScale.x;
 					if (!yEnabled)
@@ -497,7 +495,7 @@ namespace Shiva.ItemPlacing
 					if (!zEnabled)
 						axis.z = targetScale.z;
 
-					if (d > 0f) {
+					if (d > 0) {
 						targetObject.transform.localScale = axis;
 					}
 				}
