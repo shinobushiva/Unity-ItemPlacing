@@ -552,6 +552,8 @@ namespace Shiva.ItemPlacing
 		public void Duplicate ()
 		{
 			if (targetObject != null) {
+
+				SetCollider (targetObject, true);
 				CreatePlaceItemInstance (targetObject.GetComponent<PlaceItem> ());
 				SetTarget (targetObject);
 			}

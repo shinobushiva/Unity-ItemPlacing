@@ -36,18 +36,24 @@ namespace Shiva.ItemPlacing
 
 			if (!master.root.enabled) {
 				c.enabled = false;
+//				c.gameObject.SetActive (false);
 				return;
 			} else {
 				c.enabled = true;
+//				c.gameObject.SetActive (true);
 			}
 
 			if (switcher.CurrentActive.c != null) {
 				switcher.CurrentActive.c.transform.CopyTo(c.transform);
 //				c.projectionMatrix = switcher.CurrentActive.c.projectionMatrix;
+				try{
 				c.orthographic = switcher.CurrentActive.c.orthographic;
 				c.nearClipPlane = switcher.CurrentActive.c.nearClipPlane;
 				c.farClipPlane = switcher.CurrentActive.c.farClipPlane;
 				c.fieldOfView = switcher.CurrentActive.c.fieldOfView;
+				}catch(System.Exception e){
+					Debug.Log (e.Message);
+				}
 			}
 		}
 	}

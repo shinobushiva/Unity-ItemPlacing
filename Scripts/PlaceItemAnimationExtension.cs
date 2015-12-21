@@ -116,6 +116,7 @@ namespace Shiva.ItemPlacing
 		{
 
 			Animator m_animator = GetComponentInChildren<Animator>();
+			m_animator.applyRootMotion = false;
 
 			m_animator.runtimeAnimatorController = animController;
 			m_overrideController = new AnimatorOverrideController ();
