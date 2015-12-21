@@ -66,11 +66,10 @@ namespace Shiva.ItemPlacing
 
 		public override void FromString (string part)
 		{
-			string name = part;
-
+			
 			int idx = 0;
 			foreach (Part p in characters) {
-				if(p.name == name){
+				if(p.name == part){
 					SetCurrentCharacter (idx);
 					break;
 				}

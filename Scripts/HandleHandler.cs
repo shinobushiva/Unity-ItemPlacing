@@ -14,6 +14,8 @@ namespace Shiva.ItemPlacing
 		Camera c;
 		CameraSwitcher switcher;
 
+		public PlaceItemMaster master;
+
 		void Awake(){
 			c  = gameObject.AddComponent<Camera> ();
 			switcher = FindObjectOfType<CameraSwitcher> ();
@@ -30,7 +32,15 @@ namespace Shiva.ItemPlacing
 			c.useOcclusionCulling = false;
 		}
 
-		void Update(){
+		void LateUpdate(){
+
+			if (!master.root.enabled) {
+				c.enabled = false;
+				return;
+			} else {
+				c.enabled = true;
+			}
+
 			if (switcher.CurrentActive.c != null) {
 				switcher.CurrentActive.c.transform.CopyTo(c.transform);
 //				c.projectionMatrix = switcher.CurrentActive.c.projectionMatrix;
@@ -78,6 +88,7 @@ namespace Shiva.ItemPlacing
 			GameObject hc = new GameObject ("Handle Camera", typeof(HandleCameraSync));
 			layer = LayerMask.NameToLayer ("ItemHandle");
 			hcs = hc.GetComponent<HandleCameraSync> ();
+			hcs.master = master;
 			hcs.SetLayer (layer);
 
 			this.master = master;

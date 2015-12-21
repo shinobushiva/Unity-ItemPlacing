@@ -303,7 +303,7 @@ namespace Shiva.ItemPlacing
 		private bool wasPointerDownInUI;
 
 		// Update is called once per frame
-		void Update ()
+		void LateUpdate ()
 		{
 //			if (selectionBox != null & targetObject != null) {
 //				Debug.DrawLine (selectionBox.transform.position, selectionBox.transform.position + targetObject.transform.right * 10, Color.red);
