@@ -56,6 +56,8 @@ namespace Shiva.ItemPlacing
 		//
 		public Canvas root;
 
+		public float selectionBoxInflate = 1f;
+
 		[System.Serializable]
 		public enum State
 		{
@@ -264,7 +266,7 @@ namespace Shiva.ItemPlacing
 				Bounds b = Helper.GetBoundingBox (targetObject);
 				selectionBox.transform.rotation = rot;
 				selectionBox.transform.position = b1.center;
-				selectionBox.transform.localScale = b.size * 1.1f;
+				selectionBox.transform.localScale = b.size * selectionBoxInflate;
 
 
 				targetObject.transform.rotation = rot;

@@ -160,7 +160,8 @@ namespace Shiva.ItemPlacing
 			if (targetObject != null) {
 				Quaternion rot = master.selectionBox.transform.rotation;
 				master.selectionBox.transform.rotation = Quaternion.identity;
-				Bounds b = Helper.GetBoundingBox (master.selectionBox);
+//				Bounds b = Helper.GetBoundingBox (master.selectionBox);
+				Bounds b = Helper.GetBoundingBox (targetObject);
 				master.selectionBox.transform.rotation = rot;
 
 				float dist = Vector3.Distance (hcs.transform.position, targetObject.transform.position);
