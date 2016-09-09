@@ -273,7 +273,8 @@ namespace Shiva.ItemPlacing
 
 
 			} else {
-				selectionBox.transform.localScale = Vector3.zero;
+				if(selectionBox)
+					selectionBox.transform.localScale = Vector3.zero;
 			}
 
 		}
