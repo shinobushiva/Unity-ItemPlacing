@@ -153,9 +153,11 @@ namespace Shiva.ItemPlacing
 
 		void CreatePlaceItemInstance (PlaceItem pi)
 		{
+			#if !UNITY_WEBGL
 			if (Network.isServer || Network.isClient)
 				targetObject = (GameObject)Network.Instantiate (pi.gameObject, Vector3.zero, pi.transform.rotation, 1);
 			else
+			#endif
 				targetObject = (GameObject)GameObject.Instantiate (pi.gameObject, Vector3.zero, pi.transform.rotation);
 
 			placedItems.Add (targetObject.GetComponent<PlaceItem> ());
@@ -626,11 +628,13 @@ namespace Shiva.ItemPlacing
 				PlaceItem pi = placeItems.GetItemByName (pid.itemName.Trim ());
 				if (pi == null)
 					continue;
-					
+
+				#if !UNITY_WEBGL
 				if (Network.isServer || Network.isClient)
 					targetObject = (GameObject)Network.Instantiate (pi.gameObject, Vector3.zero, 
 						                                                pi.transform.rotation, 1);
 				else
+				#endif
 					targetObject = (GameObject)GameObject.Instantiate (pi.gameObject, Vector3.zero, 
 						                                                   pi.transform.rotation);
 				targetObject.transform.position = pid.loc;

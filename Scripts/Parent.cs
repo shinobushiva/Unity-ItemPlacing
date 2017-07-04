@@ -12,12 +12,18 @@ public class Parent : MonoBehaviour {
 
 	public void SetInActive(){
 		gameObject.SetActive (false);
-		if(GetComponent<NetworkView>())
-            GetComponent<NetworkView>().RPC("SetInActiveRPC", RPCMode.Others);
-		}
 
+		#if !UNITY_WEBGL
+		if(GetComponent<NetworkView>())
+        	GetComponent<NetworkView>().RPC("SetInActiveRPC", RPCMode.Others);
+		#endif
+	}
+
+
+	#if !UNITY_WEBGL
 	[RPC]
 	void SetInActiveRPC(){
 		gameObject.SetActive (false);
 	}
+	#endif
 }

@@ -1,4 +1,6 @@
-﻿
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+
 Shader "ItemPlacing/Selected" {
      
     Properties {
@@ -46,7 +48,7 @@ Shader "ItemPlacing/Selected" {
         // VERTEX SHADER
         vertexOutput vert(vertexInput input) {
           vertexOutput output;
-          output.pos = mul(UNITY_MATRIX_MVP, input.pos);
+          output.pos = UnityObjectToClipPos(input.pos);
           
           // Calculate the world position coordinates to pass to the fragment shader
           output.texcoord =  input.texcoord; //mul(_Object2World, input.pos);
