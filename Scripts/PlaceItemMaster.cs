@@ -10,6 +10,10 @@ using System.Xml.Serialization;
 namespace Shiva.ItemPlacing
 {
 
+	public enum PlaceItemEvent{
+		PlaceItemTransformed, ItemPlaced, ItemSelected, ItemReleased
+	}
+
 	public class PlaceItemMaster : MethodAll
 	{
 
@@ -36,6 +40,13 @@ namespace Shiva.ItemPlacing
 		public RectTransform scrollContent;
 		//
 		private GameObject targetObject;
+
+		public GameObject TargetObject {
+			get {
+				return targetObject;
+			}
+		}
+
 		private List<PlaceItem> placedItems;
 
 		//
@@ -57,6 +68,30 @@ namespace Shiva.ItemPlacing
 		public Canvas root;
 
 		public float selectionBoxInflate = 1f;
+
+		public event PlaceItemEventHandler placeItemEvent;
+		public delegate void PlaceItemEventHandler(PlaceItemEvent e, GameObject item);
+
+		public void FirePlaceItemTransformed(){
+			placeItemEvent(PlaceItemEvent.PlaceItemTransformed, targetObject);
+		}
+
+		public void TransfromTarget(Vector3? dpos, Vector3? rot, Vector3? dsize){
+			if (targetObject == null)
+				return;
+			
+			if (dpos != null) {
+			}
+
+			if (rot != null) {
+				Quaternion q = targetObject.transform.rotation;
+				q.eulerAngles = rot.Value;
+				targetObject.transform.rotation = q;
+			}
+
+			if (dsize != null) {
+			}
+		}
 
 		[System.Serializable]
 		public enum State
@@ -250,6 +285,7 @@ namespace Shiva.ItemPlacing
 					RectTransform rt = pie.GetEditorPanel ();
 					rt.transform.SetParent (extensionPanel.transform, false);
 				}
+				placeItemEvent(PlaceItemEvent.ItemSelected, targetObject);
 			} 
 
 			UpdateSelectionBox ();
@@ -418,6 +454,8 @@ namespace Shiva.ItemPlacing
 							pos.z = targetPosition.z;
 						
 						targetObject.transform.position = pos;
+
+						placeItemEvent(PlaceItemEvent.PlaceItemTransformed, targetObject);
 					} else {
 						Vector3 dd = Input.mousePosition - pressedMousePosition;
 						if (dd.magnitude < 2)
@@ -436,7 +474,6 @@ namespace Shiva.ItemPlacing
 					}
 
 				}
-
 			}
 
 			if (EditState == State.Rotating) {
@@ -467,9 +504,12 @@ namespace Shiva.ItemPlacing
 						axis.y = 0;
 					if (!zEnabled)
 						axis.z = 0;
+					
 					targetObject.transform.rotation = targetRotation;
 					targetObject.transform.Rotate (axis * d, Space.World);
 
+					print ("Rotate");
+					placeItemEvent(PlaceItemEvent.PlaceItemTransformed, targetObject);
 				}
 
 			}
@@ -503,6 +543,8 @@ namespace Shiva.ItemPlacing
 					if (d > 0) {
 						targetObject.transform.localScale = axis;
 					}
+
+					placeItemEvent(PlaceItemEvent.PlaceItemTransformed, targetObject);
 				}
 
 			}

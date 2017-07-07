@@ -7,6 +7,22 @@ using System.Linq;
 
 namespace Shiva.ItemPlacing
 {
+	public class AnimationClipOverrides : List<KeyValuePair<AnimationClip, AnimationClip>>
+	{
+		public AnimationClipOverrides(int capacity) : base(capacity) {}
+
+		public AnimationClip this[string name]
+		{
+			get { return this.Find(x => x.Key.name.Equals(name)).Value; }
+			set
+			{
+				int index = this.FindIndex(x => x.Key.name.Equals(name));
+				if (index != -1)
+					this[index] = new KeyValuePair<AnimationClip, AnimationClip>(this[index].Key, value);
+			}
+		}
+	}
+
 	public class PlaceItemAnimationExtension : PlaceItemExtension
 	{
 		
@@ -33,7 +49,6 @@ namespace Shiva.ItemPlacing
 
 		public TargetPart[] targetParts;
 
-		public AnimatorOverrideController animController;
 
 		[System.Serializable]
 		private class SerializableParts : SerializablePart
@@ -110,37 +125,34 @@ namespace Shiva.ItemPlacing
 			return str.Substring (0, str.Length - 1).TrimStart ();
 		}
 
-		private AnimatorOverrideController m_overrideController;
+
+//		public AnimatorOverrideController animController;
+//		private AnimatorOverrideController m_overrideController;
+
+		protected Animator animator;
+		protected AnimatorOverrideController animatorOverrideController;
+		protected AnimationClipOverrides clipOverrides;
 
 		public void ReplaceClip ()
 		{
+			animator = GetComponentInChildren<Animator>();
+			animator.applyRootMotion = false;
 
-			Animator m_animator = GetComponentInChildren<Animator>();
-			m_animator.applyRootMotion = false;
+			animatorOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+			animator.runtimeAnimatorController = animatorOverrideController;
 
-			m_animator.runtimeAnimatorController = animController;
-			m_overrideController = new AnimatorOverrideController ();
-			m_overrideController.runtimeAnimatorController = m_animator.runtimeAnimatorController;
-		
+			clipOverrides = new AnimationClipOverrides(animatorOverrideController.overridesCount);
+			animatorOverrideController.GetOverrides(clipOverrides);
 
-			AnimationClip[] cs = m_animator.runtimeAnimatorController.animationClips;
-			foreach (AnimationClip ac in cs) {
-				print (ac);
+			foreach (TargetPart tp in targetParts) {
+				clipOverrides [tp.targetClipName] = tp.clips [tp.currentClipIndex].clip;
 			}
+			animatorOverrideController.ApplyOverrides(clipOverrides);
 
-			if (m_overrideController) {
-				foreach (TargetPart tp in targetParts) {
-					m_overrideController [tp.targetClipName] = tp.clips[tp.currentClipIndex].clip;
-				}
-				if (!ReferenceEquals (m_animator.runtimeAnimatorController, m_overrideController)) {
-					m_animator.runtimeAnimatorController = m_overrideController;
-				}
-			}
+			animator.gameObject.SetActive (false);
+			animator.gameObject.SetActive (true);
 
-			gameObject.GetComponent<PlaceItem> ().EndEditing ();
 		}
-
-
 
 		public override RectTransform GetEditorPanel ()
 		{
@@ -198,6 +210,20 @@ namespace Shiva.ItemPlacing
 		{
 			ReplaceClip ();
 		}
+
+//		public void Start()
+//		{
+//			animator = GetComponentInChildren<Animator>();
+//
+//			animatorOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+//			animator.runtimeAnimatorController = animatorOverrideController;
+//
+//			clipOverrides = new AnimationClipOverrides(animatorOverrideController.overridesCount);
+//			animatorOverrideController.GetOverrides(clipOverrides);
+//			foreach (var co in clipOverrides) {
+//				print (co.Key);
+//			}
+//		}
 
 		bool playStarted = false;
 		

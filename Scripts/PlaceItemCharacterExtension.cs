@@ -91,10 +91,12 @@ namespace Shiva.ItemPlacing
 				animator = currentCharacter.GetComponent<Animator> ();
 				Destroy (currentCharacter);
 			}
-			currentCharacter = GameObject.Instantiate (characters [num].target);
-			currentCharacter.transform.SetParent (transform, false);
+			currentCharacter = GameObject.Instantiate (characters [num].target, Vector3.zero, Quaternion.identity);
+			currentCharacter.transform.SetParent (transform, true);
 			currentCharacter.transform.localPosition = Vector3.zero;
 			currentCharacter.transform.localRotation = Quaternion.identity;
+			print (currentCharacter.transform);
+			print (currentCharacter.transform.localPosition);
 
 			if (animator != null) {
 				currentCharacter.GetComponent<Animator> ().runtimeAnimatorController = animator.runtimeAnimatorController;

@@ -288,6 +288,7 @@ namespace Shiva.ItemPlacing
 
 					Update (targetObject);
 					master.UpdateSelectionBox ();
+					master.FirePlaceItemTransformed ();
 				}
 			}
 
@@ -310,6 +311,7 @@ namespace Shiva.ItemPlacing
 					
 					Update (targetObject);
 					master.UpdateSelectionBox ();
+					master.FirePlaceItemTransformed ();
 				}
 			}
 
@@ -333,6 +335,7 @@ namespace Shiva.ItemPlacing
 					
 					Update (targetObject);
 					master.UpdateSelectionBox ();
+					master.FirePlaceItemTransformed ();
 				}
 			}
 
@@ -358,6 +361,7 @@ namespace Shiva.ItemPlacing
 						dist / Vector3.Distance (s1, s2)*30);
 					Update (targetObject);
 					master.UpdateSelectionBox ();
+					master.FirePlaceItemTransformed ();
 				}
 			}
 
@@ -383,6 +387,7 @@ namespace Shiva.ItemPlacing
 						dist / Vector3.Distance (s1, s2)*30);
 					Update (targetObject);
 					master.UpdateSelectionBox ();
+					master.FirePlaceItemTransformed ();
 				}
 			}
 
@@ -408,6 +413,7 @@ namespace Shiva.ItemPlacing
 						dist / Vector3.Distance (s1, s2)*30);
 					Update (targetObject);
 					master.UpdateSelectionBox ();
+					master.FirePlaceItemTransformed ();
 				}
 			}
 		}
