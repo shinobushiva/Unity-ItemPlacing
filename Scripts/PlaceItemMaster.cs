@@ -285,7 +285,8 @@ namespace Shiva.ItemPlacing
 					RectTransform rt = pie.GetEditorPanel ();
 					rt.transform.SetParent (extensionPanel.transform, false);
 				}
-				placeItemEvent(PlaceItemEvent.ItemSelected, targetObject);
+				if(placeItemEvent != null)
+					placeItemEvent(PlaceItemEvent.ItemSelected, targetObject);
 			} 
 
 			UpdateSelectionBox ();
